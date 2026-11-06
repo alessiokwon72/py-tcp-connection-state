@@ -22,3 +22,10 @@ Reading `/proc/net/tcp` by hand means dealing with hex-encoded IPv4 addresses, l
 ## Awkward edge
 
 The timer column encodes a duration as `(value * ticks_per_sec) / 100` seconds, where `ticks_per_sec` comes from `USER_HZ`. On almost all x86 Linux systems `USER_HZ` is 100. If this library runs on an architecture with a different tick rate, the `timer_duration` field will be wrong. We do not detect this at runtime because doing so portably requires sysconf, and this is a procfs parser, not a system introspection tool.
+
+## Design notes
+
+The window stores values eagerly rather than keeping running aggregates. Running
+sums drift with floating point over long streams, and recomputing from a small
+buffer is cheap enough that the drift is not worth the speed.
+
